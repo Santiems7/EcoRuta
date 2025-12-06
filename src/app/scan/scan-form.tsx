@@ -14,15 +14,21 @@ import { Camera, Leaf, Loader2, Recycle, Trash2, Upload } from 'lucide-react';
 
 const ResultIcon = ({ classification }: { classification: string }) => {
   switch (classification) {
-    case 'organic':
+    case 'compostaje':
       return <Leaf className="h-12 w-12 text-green-600" />;
-    case 'recyclable':
+    case 'reciclaje':
       return <Recycle className="h-12 w-12 text-blue-600" />;
-    case 'non-recyclable':
+    case 'no_reciclaje_compostaje':
       return <Trash2 className="h-12 w-12 text-gray-600" />;
     default:
       return null;
   }
+};
+
+const classificationLabels: Record<string, string> = {
+  reciclaje: 'Reciclaje',
+  compostaje: 'Compostaje',
+  no_reciclaje_compostaje: 'No es para reciclaje ni compostaje',
 };
 
 export function ScanForm() {
@@ -134,11 +140,13 @@ export function ScanForm() {
           </Card>
       )}
 
-      {result && (
+          {result && (
         <Card className="bg-card/80 animate-in fade-in-50">
           <CardHeader className="items-center text-center">
             <ResultIcon classification={result.classification} />
-            <CardTitle className="capitalize font-headline text-2xl">{result.classification.replace('-', ' ')}</CardTitle>
+            <CardTitle className="font-headline text-2xl">
+              {classificationLabels[result.classification] ?? result.classification}
+            </CardTitle>
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-muted-foreground">{result.reason}</p>
