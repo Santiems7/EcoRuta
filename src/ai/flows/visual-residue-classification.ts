@@ -36,6 +36,7 @@ const classifyPrompt = ai.definePrompt(
     name: 'residueClassifier',
     input: { schema: VisualResidueClassificationInputSchema },
     output: { schema: VisualResidueClassificationOutputSchema },
+    model: defaultModel,
     prompt: `Eres un experto en gestión de residuos.
 
 Recibirás la foto de un residuo y debes clasificarlo únicamente como:
