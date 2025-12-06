@@ -20,6 +20,7 @@ import {
   BarChart3,
   User,
   Leaf,
+  PlayCircle,
 } from 'lucide-react';
 
 const menuItems = [
@@ -29,6 +30,7 @@ const menuItems = [
   { href: '/map', label: 'Mapa de Puntos', icon: Map },
   { href: '/guides', label: 'Guías', icon: BookOpen },
   { href: '/stats', label: 'Impacto', icon: BarChart3 },
+  { href: '/demo', label: 'Demo desde IDE', icon: PlayCircle },
   { href: '/profile', label: 'Mi Perfil', icon: User },
 ];
 
