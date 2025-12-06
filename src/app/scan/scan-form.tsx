@@ -7,9 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { classifyResidue, type ClassificationFailureReason } from './actions';
-import type { VisualResidueClassificationOutput } from '@/ai/flows/visual-residue-classification';
+import type { VisualResidueClassificationOutput } from './actions';
 import { AlertTriangle, Camera, Leaf, Loader2, Recycle, Trash2, Upload } from 'lucide-react';
 
 const ResultIcon = ({ classification }: { classification: string }) => {
@@ -33,6 +34,7 @@ const classificationLabels: Record<string, string> = {
 
 export function ScanForm() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<VisualResidueClassificationOutput | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -63,13 +65,22 @@ export function ScanForm() {
       return;
     }
 
+    if (!description.trim()) {
+      toast({
+        title: 'Agrega una descripción',
+        description: 'Explica qué estás descartando para clasificarlo sin IA.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsLoading(true);
     setResult(null);
     setErrorMessage(null);
     setErrorReason(null);
 
     try {
-      const classificationResult = await classifyResidue(imagePreview);
+      const classificationResult = await classifyResidue(imagePreview, description);
       if (!classificationResult.success) {
         setErrorMessage(classificationResult.message);
         setErrorReason(classificationResult.reason);
@@ -122,6 +133,17 @@ export function ScanForm() {
         </div>
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="description">Descripción del residuo (sin IA)</Label>
+        <Textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Ej: botella plástica de agua, cáscaras de huevo, lata de refresco"
+          className="min-h-[100px]"
+        />
+      </div>
+
       {imagePreview && (
         <div className="w-full max-w-sm mx-auto">
           <Image
@@ -164,8 +186,8 @@ export function ScanForm() {
             <div>
               <CardTitle className="font-headline text-lg">No pudimos clasificar la imagen</CardTitle>
               <CardDescription className="text-destructive/80">
-                {errorReason === 'quota'
-                  ? 'El servicio de IA alcanzó su límite: inténtalo de nuevo más tarde o revisa la configuración.'
+                {errorReason === 'validation'
+                  ? 'Revisa que hayas agregado la foto y una descripción corta del residuo.'
                   : 'Revisa la imagen o inténtalo nuevamente en unos minutos.'}
               </CardDescription>
             </div>
@@ -185,7 +207,7 @@ export function ScanForm() {
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center">
-            <p className="text-muted-foreground">{result.reason}</p>
+            <p className="text-muted-foreground whitespace-pre-wrap">{result.reason}</p>
           </CardContent>
         </Card>
       )}

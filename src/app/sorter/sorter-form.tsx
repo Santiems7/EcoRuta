@@ -8,16 +8,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { getSortingInstructions } from './actions';
-import type { IntelligentWasteSortingOutput } from '@/ai/flows/intelligent-waste-sorting';
+import { getSortingInstructions, type SortingInstructionsResult } from './actions';
 import { Camera, Lightbulb, Loader2, Upload } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 
 export function SorterForm() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [location, setLocation] = useState('Medellín');
+  const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<IntelligentWasteSortingOutput | null>(null);
+  const [result, setResult] = useState<SortingInstructionsResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -44,11 +44,20 @@ export function SorterForm() {
       return;
     }
 
+    if (!description.trim()) {
+      toast({
+        title: 'Agrega una descripción',
+        description: 'Explica qué estás descartando para generar instrucciones sin IA.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsLoading(true);
     setResult(null);
 
     try {
-      const instructionResult = await getSortingInstructions(imagePreview, location);
+      const instructionResult = await getSortingInstructions(imagePreview, location, description);
       setResult(instructionResult);
     } catch (error) {
       console.error(error);
@@ -91,13 +100,24 @@ export function SorterForm() {
 
         <div>
             <Label htmlFor="location">Ubicación (opcional)</Label>
-            <Input 
+            <Input
                 id="location"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="Ej: Medellín, Colombia"
                 className="mt-2"
             />
+        </div>
+
+        <div>
+          <Label htmlFor="description">Descripción del residuo (sin IA)</Label>
+          <Textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Ej: cajas de cartón limpias, restos de comida, botella de vidrio"
+            className="mt-2"
+          />
         </div>
       </div>
 
