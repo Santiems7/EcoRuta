@@ -7,7 +7,7 @@
  * - VisualResidueClassificationOutput - The return type for the visualResidueClassification function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, defaultModel} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const VisualResidueClassificationInputSchema = z.object({
@@ -34,6 +34,7 @@ const classifyPrompt = ai.definePrompt(
     name: 'residueClassifier',
     input: { schema: VisualResidueClassificationInputSchema },
     output: { schema: VisualResidueClassificationOutputSchema },
+    model: defaultModel,
     prompt: `You are an expert in waste management and recycling.
 
 You will receive a photo of a waste item and must classify it as either 'organic', 'recyclable', or 'non-recyclable'.
