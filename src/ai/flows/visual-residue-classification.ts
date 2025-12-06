@@ -20,8 +20,10 @@ const VisualResidueClassificationInputSchema = z.object({
 export type VisualResidueClassificationInput = z.infer<typeof VisualResidueClassificationInputSchema>;
 
 const VisualResidueClassificationOutputSchema = z.object({
-  classification: z.enum(['organic', 'recyclable', 'non-recyclable']).describe('The classification of the waste item.'),
-  reason: z.string().describe('The reason for the classification.'),
+  classification: z
+    .enum(['reciclaje', 'compostaje', 'no_reciclaje_compostaje'])
+    .describe('La categoría de disposición adecuada para el residuo.'),
+  reason: z.string().describe('Explicación breve de por qué pertenece a esa categoría.'),
 });
 export type VisualResidueClassificationOutput = z.infer<typeof VisualResidueClassificationOutputSchema>;
 
@@ -34,13 +36,16 @@ const classifyPrompt = ai.definePrompt(
     name: 'residueClassifier',
     input: { schema: VisualResidueClassificationInputSchema },
     output: { schema: VisualResidueClassificationOutputSchema },
-    prompt: `You are an expert in waste management and recycling.
+    prompt: `Eres un experto en gestión de residuos.
 
-You will receive a photo of a waste item and must classify it as either 'organic', 'recyclable', or 'non-recyclable'.
+Recibirás la foto de un residuo y debes clasificarlo únicamente como:
+- "reciclaje" cuando pueda ir a un contenedor de reciclaje común.
+- "compostaje" cuando sea materia orgánica o compostable.
+- "no_reciclaje_compostaje" cuando no deba ir ni a reciclaje ni a compostaje.
 
-Also provide a brief reason for your classification.
+Explica brevemente el motivo de la decisión para orientar al usuario.
 
-Photo: {{media url=photoDataUri}}`,
+Foto: {{media url=photoDataUri}}`,
   },
 );
 
