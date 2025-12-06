@@ -1,0 +1,34 @@
+{
+  "placeholderImages": [
+    {
+      "id": "map-background",
+      "description": "A satellite or illustrated view of a residential complex.",
+      "imageUrl": "https://images.unsplash.com/photo-1740707590098-8631e2b3bd5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxyZXNpZGVudGlhbCUyMG1hcHxlbnwwfHx8fDE3NjQ5OTI2NDF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "residential map"
+    },
+    {
+      "id": "guide-organic",
+      "description": "Thumbnail for a video guide about separating organic waste.",
+      "imageUrl": "https://images.unsplash.com/photo-1696527785449-9a05db89c7f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjb21wb3N0JTIwdmVnZXRhYmxlc3xlbnwwfHx8fDE3NjQ5OTI2NDF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "compost vegetables"
+    },
+    {
+      "id": "guide-compost",
+      "description": "Thumbnail for a video guide explaining what can be composted.",
+      "imageUrl": "https://images.unsplash.com/photo-1587733761376-3f26fc81d17f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxnYXJkZW4lMjBjb21wb3N0fGVufDB8fHx8MTc2NDk5MjY0MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "garden compost"
+    },
+    {
+      "id": "guide-recycling",
+      "description": "Thumbnail for a video guide on how to recycle plastics and paper.",
+      "imageUrl": "https://images.unsplash.com/photo-1683516435482-f3cea544ee95?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZWN5Y2xpbmclMjBiaW58ZW58MHx8fHwxNzY0OTkyNjQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "recycling bin"
+    },
+    {
+      "id": "guide-new-residents",
+      "description": "Thumbnail for an introductory guide for new residents.",
+      "imageUrl": "https://images.unsplash.com/photo-1580191947416-62d35a55e71d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx3ZWxjb21lJTIwc2lnbnxlbnwwfHx8fDE3NjQ5NDc3Mzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "welcome sign"
+    }
+  ]
+}
