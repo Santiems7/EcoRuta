@@ -1,12 +1,5 @@
 import {z} from 'zod';
 
-export class OpenAIConfigurationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'OpenAIConfigurationError';
-  }
-}
-
 export const defaultOpenAIModel = process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
 const openAIEndpoint = process.env.OPENAI_API_URL ?? 'https://api.openai.com/v1/chat/completions';
 
@@ -39,9 +32,7 @@ interface OpenAIChoiceResponse {
 export async function callOpenAIJson<T>(params: OpenAIJsonRequest<z.ZodTypeAny>): Promise<T> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new OpenAIConfigurationError(
-      'OpenAI API key is not configured. Set the OPENAI_API_KEY environment variable to enable AI features.'
-    );
+    throw new Error('OPENAI_API_KEY is not set.');
   }
 
   const requestBody = {
