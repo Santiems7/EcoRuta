@@ -15,16 +15,16 @@ export class OpenAIQuotaError extends Error {
 }
 
 const usingFreeProvider =
-  process.env.AI_PROVIDER?.toLowerCase() === 'local' || process.env.USE_FREE_AI?.toLowerCase() === 'true';
+  process.env.AI_PROVIDER?.toLowerCase() !== 'openai' && process.env.USE_FREE_AI?.toLowerCase() !== 'false';
 
 const openAIEndpoint = usingFreeProvider
-  ? process.env.FREE_OPENAI_API_URL ?? 'http://localhost:11434/v1/chat/completions'
+  ? process.env.FREE_OPENAI_API_URL ?? 'https://ai.fakeopen.com/v1/chat/completions'
   : process.env.OPENAI_API_URL ?? 'https://api.openai.com/v1/chat/completions';
 
-const apiKey = usingFreeProvider ? process.env.FREE_OPENAI_API_KEY ?? process.env.OPENAI_API_KEY : process.env.OPENAI_API_KEY;
+const apiKey = usingFreeProvider ? process.env.FREE_OPENAI_API_KEY ?? '' : process.env.OPENAI_API_KEY;
 
 export const defaultOpenAIModel = usingFreeProvider
-  ? process.env.FREE_VISION_MODEL ?? 'llava:latest'
+  ? process.env.FREE_VISION_MODEL ?? 'gpt-4o-mini'
   : process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
 
 const OpenAIMessageSchema = z.object({
