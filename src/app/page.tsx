@@ -1,9 +1,6 @@
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowRight, BarChart3, BookOpen, Map, ScanLine } from 'lucide-react';
-import { AppHeader } from '@/components/app-header';
-import { AppSidebar } from '@/components/app-sidebar';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { BarChart3, BookOpen, Map, PlayCircle, ScanLine } from 'lucide-react';
 import MainLayout from '@/components/main-layout';
 
 const features = [
@@ -30,6 +27,12 @@ const features = [
     description: 'Mira las estadísticas de reciclaje y el impacto positivo de la comunidad.',
     href: '/stats',
     icon: <BarChart3 className="h-8 w-8 text-primary" />,
+  },
+  {
+    title: 'Demo desde IDE',
+    description: 'Arranca un recorrido virtual para validar la app con datos de prueba.',
+    href: '/demo',
+    icon: <PlayCircle className="h-8 w-8 text-primary" />,
   },
 ];
 
