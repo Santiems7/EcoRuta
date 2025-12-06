@@ -91,6 +91,15 @@ export async function callOpenAIJson<T>(params: OpenAIJsonRequest<z.ZodTypeAny>)
 
       const parsedMessage = parsedError.error?.message;
       if (parsedMessage) {
+        const isFreeProviderPandoraError =
+          usingFreeProvider && response.status === 429 && parsedMessage.toLowerCase().includes('pandoranext');
+
+        if (isFreeProviderPandoraError) {
+          throw new OpenAIConfigurationError(
+            'El proveedor gratuito de IA tuvo un problema. Intenta de nuevo, actualiza el servidor gratuito o configura OPENAI_API_KEY.'
+          );
+        }
+
         throw new Error(`OpenAI API error (${response.status}): ${parsedMessage}`);
       }
     } catch (error) {

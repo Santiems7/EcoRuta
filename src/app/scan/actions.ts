@@ -16,10 +16,13 @@ export async function classifyResidue(photoDataUri: string): Promise<Classificat
   } catch (error) {
     console.error('Error in visualResidueClassification flow:', error);
     if (error instanceof OpenAIConfigurationError) {
+      const message = error.message?.includes('OPENAI_API_KEY')
+        ? 'Configura OPENAI_API_KEY antes de clasificar residuos.'
+        : error.message ?? 'Configura OPENAI_API_KEY antes de clasificar residuos.';
       return {
         success: false,
         reason: 'configuration',
-        message: 'Configura OPENAI_API_KEY antes de clasificar residuos.',
+        message,
       };
     }
     if (error instanceof OpenAIQuotaError) {
