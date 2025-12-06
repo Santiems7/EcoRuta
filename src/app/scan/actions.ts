@@ -1,42 +1,46 @@
 'use server';
 
-import { visualResidueClassification, type VisualResidueClassificationOutput } from '@/ai/flows/visual-residue-classification';
-import { OpenAIConfigurationError, OpenAIQuotaError } from '@/ai/openai-client';
+import { classifyWasteByDescription, type WasteClassification } from '@/lib/manual-sorting';
 
-export type ClassificationFailureReason = 'configuration' | 'quota' | 'unexpected';
+export type ClassificationFailureReason = 'validation' | 'unexpected';
+
+export type VisualResidueClassificationOutput = {
+  classification: WasteClassification;
+  reason: string;
+};
 
 export type ClassificationResult =
   | {success: true; data: VisualResidueClassificationOutput}
   | {success: false; reason: ClassificationFailureReason; message: string};
 
-export async function classifyResidue(photoDataUri: string): Promise<ClassificationResult> {
+export async function classifyResidue(photoDataUri: string, description: string): Promise<ClassificationResult> {
   try {
-    const result = await visualResidueClassification({ photoDataUri });
-    return {success: true, data: result};
-  } catch (error) {
-    console.error('Error in visualResidueClassification flow:', error);
-    if (error instanceof OpenAIConfigurationError) {
-      const message = error.message?.includes('OPENAI_API_KEY')
-        ? 'Configura OPENAI_API_KEY antes de clasificar residuos.'
-        : error.message ?? 'Configura OPENAI_API_KEY antes de clasificar residuos.';
+    if (!photoDataUri) {
       return {
         success: false,
-        reason: 'configuration',
-        message,
-      };
-    }
-    if (error instanceof OpenAIQuotaError) {
-      return {
-        success: false,
-        reason: 'quota',
-        message: 'Has agotado la cuota de OpenAI: revisa tu plan o inténtalo más tarde.',
+        reason: 'validation',
+        message: 'Agrega una foto para acompañar la clasificación manual.',
       };
     }
 
+    const trimmedDescription = description.trim();
+    if (!trimmedDescription) {
+      return {
+        success: false,
+        reason: 'validation',
+        message: 'Describe brevemente el residuo para clasificarlo sin IA.',
+      };
+    }
+
+    const result = classifyWasteByDescription(trimmedDescription);
+
+    return {success: true, data: result};
+  } catch (error) {
+    console.error('Error en la clasificación manual:', error);
     return {
       success: false,
       reason: 'unexpected',
-      message: 'No se pudo clasificar el residuo. Inténtalo de nuevo.',
+      message: 'No se pudo clasificar la imagen de forma manual. Inténtalo nuevamente.',
     };
   }
 }
