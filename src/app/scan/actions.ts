@@ -3,7 +3,7 @@
 import { visualResidueClassification, type VisualResidueClassificationOutput } from '@/ai/flows/visual-residue-classification';
 import { OpenAIConfigurationError, OpenAIQuotaError } from '@/ai/openai-client';
 
-type ClassificationFailureReason = 'configuration' | 'quota' | 'unexpected';
+export type ClassificationFailureReason = 'configuration' | 'quota' | 'unexpected';
 
 export type ClassificationResult =
   | {success: true; data: VisualResidueClassificationOutput}

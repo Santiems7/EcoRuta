@@ -8,9 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { classifyResidue } from './actions';
+import { classifyResidue, type ClassificationFailureReason } from './actions';
 import type { VisualResidueClassificationOutput } from '@/ai/flows/visual-residue-classification';
-import { Camera, Leaf, Loader2, Recycle, Trash2, Upload } from 'lucide-react';
+import { AlertTriangle, Camera, Leaf, Loader2, Recycle, Trash2, Upload } from 'lucide-react';
 
 const ResultIcon = ({ classification }: { classification: string }) => {
   switch (classification) {
@@ -35,6 +35,8 @@ export function ScanForm() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<VisualResidueClassificationOutput | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorReason, setErrorReason] = useState<ClassificationFailureReason | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -63,10 +65,14 @@ export function ScanForm() {
 
     setIsLoading(true);
     setResult(null);
+    setErrorMessage(null);
+    setErrorReason(null);
 
     try {
       const classificationResult = await classifyResidue(imagePreview);
       if (!classificationResult.success) {
+        setErrorMessage(classificationResult.message);
+        setErrorReason(classificationResult.reason);
         toast({
           title: 'Error de clasificación',
           description: classificationResult.message,
@@ -83,6 +89,8 @@ export function ScanForm() {
         description: 'No se pudo clasificar la imagen. Inténtalo de nuevo.',
         variant: 'destructive',
       });
+      setErrorMessage('No se pudo clasificar la imagen. Inténtalo de nuevo.');
+      setErrorReason('unexpected');
     } finally {
       setIsLoading(false);
     }
@@ -99,8 +107,8 @@ export function ScanForm() {
           </Button>
           <span className="text-muted-foreground text-sm">o</span>
           <Button type="button" variant="ghost" onClick={() => fileInputRef.current?.click()}>
-             <Upload className="mr-2 h-4 w-4" />
-             Subir Archivo
+            <Upload className="mr-2 h-4 w-4" />
+            Subir Archivo
           </Button>
           <Input
             id="waste-image"
@@ -137,19 +145,38 @@ export function ScanForm() {
       )}
 
       {isLoading && (
-         <Card>
-            <CardHeader className="items-center text-center">
-              <Skeleton className="h-12 w-12 rounded-full" />
-              <Skeleton className="h-6 w-32 mt-2" />
-            </CardHeader>
-            <CardContent className="text-center space-y-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4 mx-auto" />
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader className="items-center text-center">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <Skeleton className="h-6 w-32 mt-2" />
+          </CardHeader>
+          <CardContent className="text-center space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4 mx-auto" />
+          </CardContent>
+        </Card>
       )}
 
-          {result && (
+      {errorMessage && (
+        <Card className="border-destructive/40 bg-destructive/10">
+          <CardHeader className="flex flex-row items-start gap-3">
+            <AlertTriangle className="h-6 w-6 text-destructive" />
+            <div>
+              <CardTitle className="font-headline text-lg">No pudimos clasificar la imagen</CardTitle>
+              <CardDescription className="text-destructive/80">
+                {errorReason === 'quota'
+                  ? 'El servicio de IA alcanzó su límite: inténtalo de nuevo más tarde o revisa la configuración.'
+                  : 'Revisa la imagen o inténtalo nuevamente en unos minutos.'}
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">{errorMessage}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {result && (
         <Card className="bg-card/80 animate-in fade-in-50">
           <CardHeader className="items-center text-center">
             <ResultIcon classification={result.classification} />
