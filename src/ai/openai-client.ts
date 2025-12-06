@@ -7,13 +7,6 @@ export class OpenAIConfigurationError extends Error {
   }
 }
 
-export class OpenAIQuotaError extends Error {
-  constructor(message = 'OpenAI quota exceeded.') {
-    super(message);
-    this.name = 'OpenAIQuotaError';
-  }
-}
-
 export const defaultOpenAIModel = process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
 const openAIEndpoint = process.env.OPENAI_API_URL ?? 'https://api.openai.com/v1/chat/completions';
 
