@@ -66,7 +66,16 @@ export function ScanForm() {
 
     try {
       const classificationResult = await classifyResidue(imagePreview);
-      setResult(classificationResult);
+      if (!classificationResult.success) {
+        toast({
+          title: 'Error de clasificación',
+          description: classificationResult.message,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setResult(classificationResult.data);
     } catch (error) {
       console.error(error);
       toast({
