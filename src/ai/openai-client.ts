@@ -14,8 +14,18 @@ export class OpenAIQuotaError extends Error {
   }
 }
 
-export const defaultOpenAIModel = process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
-const openAIEndpoint = process.env.OPENAI_API_URL ?? 'https://api.openai.com/v1/chat/completions';
+const usingFreeProvider =
+  process.env.AI_PROVIDER?.toLowerCase() === 'local' || process.env.USE_FREE_AI?.toLowerCase() === 'true';
+
+const openAIEndpoint = usingFreeProvider
+  ? process.env.FREE_OPENAI_API_URL ?? 'http://localhost:11434/v1/chat/completions'
+  : process.env.OPENAI_API_URL ?? 'https://api.openai.com/v1/chat/completions';
+
+const apiKey = usingFreeProvider ? process.env.FREE_OPENAI_API_KEY ?? process.env.OPENAI_API_KEY : process.env.OPENAI_API_KEY;
+
+export const defaultOpenAIModel = usingFreeProvider
+  ? process.env.FREE_VISION_MODEL ?? 'llava:latest'
+  : process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
 
 const OpenAIMessageSchema = z.object({
   role: z.enum(['system', 'user', 'assistant']),
@@ -44,8 +54,7 @@ interface OpenAIChoiceResponse {
 }
 
 export async function callOpenAIJson<T>(params: OpenAIJsonRequest<z.ZodTypeAny>): Promise<T> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
+  if (!apiKey && !usingFreeProvider) {
     throw new OpenAIConfigurationError('OPENAI_API_KEY is not set.');
   }
 
@@ -67,7 +76,7 @@ export async function callOpenAIJson<T>(params: OpenAIJsonRequest<z.ZodTypeAny>)
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
+      ...(apiKey ? {Authorization: `Bearer ${apiKey}`} : {}),
     },
     body: JSON.stringify(requestBody),
   });
