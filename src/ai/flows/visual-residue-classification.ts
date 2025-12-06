@@ -7,7 +7,7 @@
  * - VisualResidueClassificationOutput - The return type for the visualResidueClassification function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, defaultModel} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const VisualResidueClassificationInputSchema = z.object({

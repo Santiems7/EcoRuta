@@ -8,7 +8,7 @@
  * - IntelligentWasteSortingOutput - The return type for the intelligentWasteSorting function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, defaultModel} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const IntelligentWasteSortingInputSchema = z.object({
@@ -34,6 +34,7 @@ const prompt = ai.definePrompt({
   name: 'intelligentWasteSortingPrompt',
   input: {schema: IntelligentWasteSortingInputSchema},
   output: {schema: IntelligentWasteSortingOutputSchema},
+  model: defaultModel,
   prompt: `You are an expert in waste management and recycling policies.
 
 Given a photo of a waste item and the user's location, provide detailed instructions on how to sort the waste according to local guidelines.
