@@ -53,7 +53,7 @@ export function InteractiveMap() {
         alt={mapImage.description}
         data-ai-hint={mapImage.imageHint}
         fill
-        className="object-cover"
+        className="object-contain bg-muted"
       />
       {wastePoints.map((point) => (
         <Popover key={point.id}>
