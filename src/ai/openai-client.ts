@@ -1,5 +1,19 @@
 import {z} from 'zod';
 
+export class OpenAIConfigurationError extends Error {
+  constructor(message = 'OpenAI configuration error.') {
+    super(message);
+    this.name = 'OpenAIConfigurationError';
+  }
+}
+
+export class OpenAIQuotaError extends Error {
+  constructor(message = 'OpenAI quota exceeded.') {
+    super(message);
+    this.name = 'OpenAIQuotaError';
+  }
+}
+
 export const defaultOpenAIModel = process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
 const openAIEndpoint = process.env.OPENAI_API_URL ?? 'https://api.openai.com/v1/chat/completions';
 
@@ -32,7 +46,7 @@ interface OpenAIChoiceResponse {
 export async function callOpenAIJson<T>(params: OpenAIJsonRequest<z.ZodTypeAny>): Promise<T> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new Error('OPENAI_API_KEY is not set.');
+    throw new OpenAIConfigurationError('OPENAI_API_KEY is not set.');
   }
 
   const requestBody = {
@@ -60,6 +74,26 @@ export async function callOpenAIJson<T>(params: OpenAIJsonRequest<z.ZodTypeAny>)
 
   if (!response.ok) {
     const errorText = await response.text();
+    try {
+      const parsedError = JSON.parse(errorText) as {error?: {message?: string; code?: string}};
+      if (parsedError.error?.code === 'insufficient_quota') {
+        throw new OpenAIQuotaError(parsedError.error?.message ?? 'OpenAI quota exceeded.');
+      }
+
+      const parsedMessage = parsedError.error?.message;
+      if (parsedMessage) {
+        throw new Error(`OpenAI API error (${response.status}): ${parsedMessage}`);
+      }
+    } catch (error) {
+      if (error instanceof OpenAIQuotaError) {
+        throw error;
+      }
+
+      if (error instanceof Error && !(error instanceof SyntaxError)) {
+        throw error;
+      }
+    }
+
     throw new Error(`OpenAI API error (${response.status}): ${errorText}`);
   }
 
