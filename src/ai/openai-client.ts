@@ -14,8 +14,18 @@ export class OpenAIQuotaError extends Error {
   }
 }
 
+/**
+ * Determine whether to use the free provider.
+ *
+ * Rules:
+ * - If OPENAI_API_KEY is set, we always use the official OpenAI provider.
+ * - Otherwise, we default to the free provider unless explicitly disabled via USE_FREE_AI=false
+ *   or AI_PROVIDER=openai.
+ */
 const usingFreeProvider =
-  process.env.AI_PROVIDER?.toLowerCase() !== 'openai' && process.env.USE_FREE_AI?.toLowerCase() !== 'false';
+  !process.env.OPENAI_API_KEY &&
+  process.env.AI_PROVIDER?.toLowerCase() !== 'openai' &&
+  process.env.USE_FREE_AI?.toLowerCase() !== 'false';
 
 const openAIEndpoint = usingFreeProvider
   ? process.env.FREE_OPENAI_API_URL ?? 'https://ai.fakeopen.com/v1/chat/completions'
