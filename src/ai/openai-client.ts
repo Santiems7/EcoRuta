@@ -67,6 +67,26 @@ export async function callOpenAIJson<T>(params: OpenAIJsonRequest<z.ZodTypeAny>)
 
   if (!response.ok) {
     const errorText = await response.text();
+    try {
+      const parsedError = JSON.parse(errorText) as {error?: {message?: string; code?: string}};
+      if (parsedError.error?.code === 'insufficient_quota') {
+        throw new OpenAIQuotaError(parsedError.error?.message ?? 'OpenAI quota exceeded.');
+      }
+
+      const parsedMessage = parsedError.error?.message;
+      if (parsedMessage) {
+        throw new Error(`OpenAI API error (${response.status}): ${parsedMessage}`);
+      }
+    } catch (error) {
+      if (error instanceof OpenAIQuotaError) {
+        throw error;
+      }
+
+      if (error instanceof Error && !(error instanceof SyntaxError)) {
+        throw error;
+      }
+    }
+
     throw new Error(`OpenAI API error (${response.status}): ${errorText}`);
   }
 
