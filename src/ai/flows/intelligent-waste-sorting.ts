@@ -1,15 +1,15 @@
 'use server';
 
 /**
- * @fileOverview Implements the Intelligent Waste Sorting flow.
+ * @fileOverview Implements the Intelligent Waste Sorting flow using OpenAI.
  *
  * - intelligentWasteSorting - A function that takes an image of waste and returns sorting instructions.
  * - IntelligentWasteSortingInput - The input type for the intelligentWasteSorting function.
  * - IntelligentWasteSortingOutput - The return type for the intelligentWasteSorting function.
  */
 
-import {ai, defaultModel} from '@/ai/genkit';
-import {z} from 'genkit';
+import {callOpenAIJson, defaultOpenAIModel, type OpenAIMessage} from '@/ai/openai-client';
+import {z} from 'zod';
 
 const IntelligentWasteSortingInputSchema = z.object({
   photoDataUri: z
@@ -26,33 +26,58 @@ const IntelligentWasteSortingOutputSchema = z.object({
 });
 export type IntelligentWasteSortingOutput = z.infer<typeof IntelligentWasteSortingOutputSchema>;
 
-export async function intelligentWasteSorting(input: IntelligentWasteSortingInput): Promise<IntelligentWasteSortingOutput> {
-  return intelligentWasteSortingFlow(input);
-}
-
-const prompt = ai.definePrompt({
-  name: 'intelligentWasteSortingPrompt',
-  input: {schema: IntelligentWasteSortingInputSchema},
-  output: {schema: IntelligentWasteSortingOutputSchema},
-  model: defaultModel,
-  prompt: `You are an expert in waste management and recycling policies.
-
-Given a photo of a waste item and the user's location, provide detailed instructions on how to sort the waste according to local guidelines.
-
-Waste Item Photo: {{media url=photoDataUri}}
-Location: {{location}}
-
-Instructions:`, // location is optional, so Handlebars won't complain if it is blank
-});
-
-const intelligentWasteSortingFlow = ai.defineFlow(
-  {
-    name: 'intelligentWasteSortingFlow',
-    inputSchema: IntelligentWasteSortingInputSchema,
-    outputSchema: IntelligentWasteSortingOutputSchema,
+const intelligentWasteSortingJsonSchema = {
+  type: 'object',
+  properties: {
+    sortingInstructions: {type: 'string'},
   },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
-  }
-);
+  required: ['sortingInstructions'],
+  additionalProperties: false,
+} as const;
+
+export async function intelligentWasteSorting(
+  input: IntelligentWasteSortingInput
+): Promise<IntelligentWasteSortingOutput> {
+  const validatedInput = IntelligentWasteSortingInputSchema.parse(input);
+
+  const systemPrompt: OpenAIMessage = {
+    role: 'system',
+    content: [
+      {
+        type: 'text',
+        text: `You are an expert in waste management and recycling policies.
+
+Given a photo of a waste item and the user's location, provide detailed instructions on how to sort the waste according to local guidelines.`,
+      },
+    ],
+  };
+
+  const userPrompt: OpenAIMessage = {
+    role: 'user',
+    content: [
+      {
+        type: 'text',
+        text: `Waste Item Photo:`,
+      },
+      {
+        type: 'image_url',
+        image_url: {url: validatedInput.photoDataUri},
+      },
+      {
+        type: 'text',
+        text: `Location: ${validatedInput.location ?? 'No proporcionado'}
+
+Provide clear, concise sorting instructions for this specific item.`,
+      },
+    ],
+  };
+
+  const response = await callOpenAIJson<IntelligentWasteSortingOutput>({
+    schemaName: 'IntelligentWasteSorting',
+    schema: intelligentWasteSortingJsonSchema,
+    messages: [systemPrompt, userPrompt],
+    model: defaultOpenAIModel,
+  });
+
+  return IntelligentWasteSortingOutputSchema.parse(response);
+}
